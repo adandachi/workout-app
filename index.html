@@ -281,7 +281,7 @@
             const workoutTimer = timers[workoutIndex].sets[setIndex];
             clearInterval(workoutTimer.interval);
             workoutTimer.running = false;
-            workoutTimer.time = 5;
+            workoutTimer.time = 40;
             document.getElementById(`time-${workoutIndex}-${setIndex}`).textContent = `${workoutTimer.time}s`;
             document.getElementById(`row-${workoutIndex}-${setIndex}`).classList.remove("highlight-row");  // Remove the 'highlight-row' when stopped
         }
