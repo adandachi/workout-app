@@ -85,24 +85,24 @@
             height: 60px;
             margin: 0 auto;
         }
-        /* Dark mode adjustments for text color and borders */
+        /* Dark mode adjustments */
         .workout, .timer, td {
             color: #f4f4f4;
         }
         .highlight-row {
-            background-color: #d35400; /* Adjusted color to be more eye-friendly */
+            background-color: #d35400;
         }
         .completed {
-            background-color: #2980b9; /* Adjusted color */
+            background-color: #2980b9;
         }
         button {
             transition: background-color 0.3s;
         }
         button:hover {
-            background-color: #666; /* Slight darkening effect on hover */
+            background-color: #666;
         }
         .rest-button:hover {
-            background-color: #f39c12; /* Hover effect for the REST button */
+            background-color: #f39c12;
         }
 
         /* Modal Style */
@@ -126,27 +126,35 @@
             width: 80%;
             max-width: 800px;
             border-radius: 8px;
+            position: relative;
         }
         .modal-content iframe {
             width: 100%;
             height: 400px;
+            margin-top: 15px;
         }
         .close {
             color: #aaa;
-            float: left;
+            float: right;
             font-size: 28px;
             font-weight: bold;
+            cursor: pointer;
         }
-        .close:hover,
-        .close:focus {
-            color: black;
-            text-decoration: none;
+        #muteBtn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: #555;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
             cursor: pointer;
         }
 
         /* Styling the links */
         a {
-            color: #00bcd4;  /* Brighter cyan color */
+            color: #00bcd4;
             text-decoration: none;
         }
         a:hover {
@@ -169,21 +177,25 @@
     <div id="myModal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="closeModal()">&times;</span>
-            <iframe id="videoIframe" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            <button id="muteBtn" onclick="toggleMute()">Unmute</button>
+            <iframe id="videoIframe" src="" frameborder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                    allowfullscreen
+                    muted></iframe>
         </div>
     </div>
 
     <script>
         const workouts = [
-            { title: "1- Bench Press (Dumbbells)", videoUrl: "https://www.youtube.com/embed/TAfR_IAv7JQ" },
-            { title: "2- Arnold Press (Dumbbells)", videoUrl: "https://www.youtube.com/embed/Y_09W4XKDgY" },
-            { title: "3- Chest Fly (Dumbbells)", videoUrl: "https://www.youtube.com/embed/_8mLd6uZhYU" },
-            { title: "4- Lateral Raise (Dumbbells)", videoUrl: "https://www.youtube.com/embed/idJF1wmezDo" },
-            { title: "5- Triceps Kickbacks (Dumbbells)", videoUrl: "https://www.youtube.com/embed/LwNbZkg-PpM" },
-            { title: "6- Triceps Extension (Dumbbells)", videoUrl: "https://www.youtube.com/embed/aut2Vhqf5-A" },
-            { title: "7- Push Ups", videoUrl: "https://www.youtube.com/embed/jrwvKKW1eh0" },
-            { title: "8- Front Raise (Dumbbells)", videoUrl: "https://www.youtube.com/embed/9t6Z-UFntFM" },
-            { title: "9- Upright Row (Dumbbells)", videoUrl: "https://www.youtube.com/embed/HF-ptqM0dw8" }
+            { title: "1- Bench Press (Dumbbells)", videoUrl: "https://www.youtube.com/embed/TAfR_IAv7JQ?autoplay=1&mute=1" },
+            { title: "2- Arnold Press (Dumbbells)", videoUrl: "https://www.youtube.com/embed/Y_09W4XKDgY?autoplay=1&mute=1" },
+            { title: "3- Chest Fly (Dumbbells)", videoUrl: "https://www.youtube.com/embed/_8mLd6uZhYU?autoplay=1&mute=1" },
+            { title: "4- Lateral Raise (Dumbbells)", videoUrl: "https://www.youtube.com/embed/idJF1wmezDo?autoplay=1&mute=1" },
+            { title: "5- Triceps Kickbacks (Dumbbells)", videoUrl: "https://www.youtube.com/embed/LwNbZkg-PpM?autoplay=1&mute=1" },
+            { title: "6- Triceps Extension (Dumbbells)", videoUrl: "https://www.youtube.com/embed/aut2Vhqf5-A?autoplay=1&mute=1" },
+            { title: "7- Push Ups", videoUrl: "https://www.youtube.com/embed/jrwvKKW1eh0?autoplay=1&mute=1" },
+            { title: "8- Front Raise (Dumbbells)", videoUrl: "https://www.youtube.com/embed/9t6Z-UFntFM?autoplay=1&mute=1" },
+            { title: "9- Upright Row (Dumbbells)", videoUrl: "https://www.youtube.com/embed/HF-ptqM0dw8?autoplay=1&mute=1" }
         ];
 
         const timers = {};
@@ -199,7 +211,7 @@
                 div.id = `workout-${index}`;
 
                 let setsHTML = '';
-                for (let set = 1; set <= 3; set++) { // 3 sets
+                for (let set = 1; set <= 3; set++) {
                     setsHTML += `
                         <tr id="row-${index}-${set}">
                             <td><span>Set ${set}</span></td>
@@ -230,34 +242,42 @@
                 container.appendChild(div);
 
                 timers[index] = { sets: [], breakTimer: null };
-                for (let set = 1; set <= 3; set++) { // 3 sets
-                    timers[index].sets[set] = { time: 40, interval: null, running: false };  // Change 5 to 40 here
+                for (let set = 1; set <= 3; set++) {
+                    timers[index].sets[set] = { time: 40, interval: null, running: false };
                 }
             });
         }
 
-        // Function to open modal and load the video
         function openModal(index) {
             const modal = document.getElementById("myModal");
             const iframe = document.getElementById("videoIframe");
-            iframe.src = workouts[index].videoUrl;  // Set the video URL
+            iframe.src = workouts[index].videoUrl;
             modal.style.display = "block";
         }
 
-        // Function to close the modal
         function closeModal() {
             const modal = document.getElementById("myModal");
             const iframe = document.getElementById("videoIframe");
-            iframe.src = "";  // Reset the iframe src to stop the video
+            iframe.src = "";
             modal.style.display = "none";
         }
 
-        // Function to start the timer for a workout set
+        function toggleMute() {
+            const iframe = document.getElementById("videoIframe");
+            const btn = document.getElementById("muteBtn");
+            if (iframe.muted) {
+                iframe.muted = false;
+                btn.textContent = "Mute";
+            } else {
+                iframe.muted = true;
+                btn.textContent = "Unmute";
+            }
+        }
+
         function toggleTimer(workoutIndex, setIndex) {
             const workoutTimer = timers[workoutIndex].sets[setIndex];
             if (!workoutTimer.running) {
                 workoutTimer.running = true;
-                // Highlight the row for the active set
                 for (let i = 1; i <= 3; i++) {
                     document.getElementById(`row-${workoutIndex}-${i}`).classList.remove("highlight-row");
                 }
@@ -269,40 +289,36 @@
                     if (workoutTimer.time <= 0) {
                         clearInterval(workoutTimer.interval);
                         workoutTimer.running = false;
-                        // Highlight completed set
                         document.getElementById(`row-${workoutIndex}-${setIndex}`).classList.add("completed");
                     }
                 }, 1000);
             }
         }
 
-        // Function to stop the timer for a workout set
         function stopTimer(workoutIndex, setIndex) {
             const workoutTimer = timers[workoutIndex].sets[setIndex];
             clearInterval(workoutTimer.interval);
             workoutTimer.running = false;
-            workoutTimer.time = 40; // Reset to 40
+            workoutTimer.time = 40;
             document.getElementById(`time-${workoutIndex}-${setIndex}`).textContent = `${workoutTimer.time}s`;
-            document.getElementById(`row-${workoutIndex}-${setIndex}`).classList.remove("highlight-row");  // Remove the 'highlight-row' when stopped
+            document.getElementById(`row-${workoutIndex}-${setIndex}`).classList.remove("highlight-row");
         }
 
-        // Function to start the break/rest timer
         function startRestTimer(workoutIndex) {
             const restButton = document.getElementById(`rest-button-${workoutIndex}`);
             restButton.disabled = true;
-            let timeLeft = 20; // 20 seconds rest
+            let timeLeft = 20;
             const restTimer = setInterval(() => {
                 restButton.innerHTML = `REST ${timeLeft}s`;
                 if (timeLeft <= 0) {
                     clearInterval(restTimer);
-                    restButton.innerHTML = "REST"; // Reset to "REST" when done
+                    restButton.innerHTML = "REST";
                     restButton.disabled = false;
                 }
                 timeLeft--;
             }, 1000);
         }
 
-        // Initialize the workout table
         renderWorkouts();
     </script>
     <script>
@@ -314,6 +330,5 @@
             });
         }
     </script>
-
 </body>
 </html>
