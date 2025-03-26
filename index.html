@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<link rel="manifest" href="/manifest.json">
+    <link rel="manifest" href="/manifest.json">
     <title>Workout Timer</title>
     <style>
         body { 
@@ -203,7 +203,7 @@
                     setsHTML += `
                         <tr id="row-${index}-${set}">
                             <td><span>Set ${set}</span></td>
-                            <td class="timer" id="time-${index}-${set}">5s</td>
+                            <td class="timer" id="time-${index}-${set}">40s</td>
                             <td>
                                 <div class="buttons-container">
                                     <button id="toggle-${index}-${set}" class="start" onclick="toggleTimer(${index}, ${set})">Start</button>
@@ -231,7 +231,7 @@
 
                 timers[index] = { sets: [], breakTimer: null };
                 for (let set = 1; set <= 3; set++) { // 3 sets
-                    timers[index].sets[set] = { time: 5, interval: null, running: false };
+                    timers[index].sets[set] = { time: 40, interval: null, running: false };  // Change 5 to 40 here
                 }
             });
         }
@@ -281,7 +281,7 @@
             const workoutTimer = timers[workoutIndex].sets[setIndex];
             clearInterval(workoutTimer.interval);
             workoutTimer.running = false;
-            workoutTimer.time = 40;
+            workoutTimer.time = 40; // Reset to 40
             document.getElementById(`time-${workoutIndex}-${setIndex}`).textContent = `${workoutTimer.time}s`;
             document.getElementById(`row-${workoutIndex}-${setIndex}`).classList.remove("highlight-row");  // Remove the 'highlight-row' when stopped
         }
@@ -305,15 +305,15 @@
         // Initialize the workout table
         renderWorkouts();
     </script>
-	<script>
-		if ('serviceWorker' in navigator) {
-			navigator.serviceWorker.register('/service-worker.js').then((registration) => {
-			console.log('Service Worker registered with scope: ', registration.scope);
-		}).catch((error) => {
-		console.log('Service Worker registration failed: ', error);
-		});
-		}
-	</script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/service-worker.js').then((registration) => {
+                console.log('Service Worker registered with scope: ', registration.scope);
+            }).catch((error) => {
+                console.log('Service Worker registration failed: ', error);
+            });
+        }
+    </script>
 
 </body>
 </html>
