@@ -642,71 +642,36 @@
     <!-- Replace the YouTube button section with this -->
     <a href="#" id="youtubeBtn" class="youtube-btn">Open YouTube</a>
 
-    <script>
-        // ===== AUTHENTICATION HANDLING ===== //
-        function checkAuth() {
-            // Check if we're in an iOS PWA
-            const isIosPwa = window.navigator.standalone;
-            
-            // Check if we have an auth token (replace with your actual auth check)
-            const hasAuth = localStorage.getItem('workoutAuthToken');
-            
-            // If we're in a PWA and not authenticated, redirect to Safari
-            if (isIosPwa && !hasAuth) {
-                const currentUrl = encodeURIComponent(window.location.href);
-                window.location.href = `https://www.youtube.com?returnTo=${currentUrl}`;
-                return false;
-            }
-            
-            return true;
-        }
+	<script>
+		// ===== MODIFIED INITIALIZATION ===== //
+		function initApp() {
+			// Only check auth if you have actual login logic
+			// (Removed the forced YouTube redirect)
+			loadWorkoutData();
+			renderWorkouts();
+			
+			if ('serviceWorker' in navigator) {
+				navigator.serviceWorker.register('/service-worker.js')
+					.then(reg => console.log('Service Worker registered'))
+					.catch(err => console.log('Service Worker failed', err));
+			}
+		}
 
-        function handleAuthReturn() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const authToken = urlParams.get('authToken');
-            
-            if (authToken) {
-                localStorage.setItem('workoutAuthToken', authToken);
-                // Clean the URL
-                window.history.replaceState({}, document.title, window.location.pathname);
-            }
-        }
+		// ===== YOUTUBE BUTTON ONLY ===== //
+		document.getElementById('youtubeBtn').addEventListener('click', function(e) {
+			e.preventDefault();
+			
+			if (window.navigator.standalone) {
+				// In PWA mode - open in Safari
+				window.location.href = 'https://www.youtube.com';
+			} else {
+				// Regular browser - open in same tab
+				window.location.href = 'https://www.youtube.com';
+			}
+		});
 
-        // ===== YOUTUBE INTEGRATION ===== //
-        document.getElementById('youtubeBtn').addEventListener('click', function(e) {
-            e.preventDefault();
-            
-            if (window.navigator.standalone) {
-                // In PWA mode - open in Safari with return URL
-                const currentUrl = encodeURIComponent(window.location.href);
-                window.location.href = `https://www.youtube.com?returnTo=${currentUrl}`;
-            } else {
-                // Regular browser - open in same tab
-                window.location.href = 'https://www.youtube.com';
-            }
-        });
-
-        // ===== MODIFIED INITIALIZATION ===== //
-        function initApp() {
-            handleAuthReturn();
-            
-            if (checkAuth()) {
-                loadWorkoutData();
-                renderWorkouts();
-                
-                if ('serviceWorker' in navigator) {
-                    navigator.serviceWorker.register('/service-worker.js')
-                        .then(reg => console.log('Service Worker registered'))
-                        .catch(err => console.log('Service Worker failed', err));
-                }
-            }
-        }
-
-        // [Keep all your existing workout timer functions]
-        // (loadWorkoutData, renderWorkouts, etc.)
-
-        // Initialize the app when DOM is loaded
-        document.addEventListener('DOMContentLoaded', initApp);
-    </script>
+		// Initialize the app
+		document.addEventListener('DOMContentLoaded', initApp);
+	</script>
 </body>
 </html>
