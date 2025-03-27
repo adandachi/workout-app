@@ -638,13 +638,27 @@
                 .catch(err => console.log('Service Worker failed', err));
         }
     </script>
-	<button onclick="openYouTube()">Open YouTube</button>
 
-	<script>
-	  function openYouTube() {
-		window.location.href = "https://www.youtube.com";
-	  }
-	</script>
+    <button onclick="openYouTube()">Open YouTube</button>
+
+    <!-- The iframe container (initially hidden) -->
+    <div id="youtube-container" style="display: none;">
+        <iframe id="youtubeFrame" src="" style="width:100%; height: 100vh; border:none;"></iframe>
+    </div>
+
+    <!-- Your other existing content -->
+
+    <script>
+        function openYouTube() {
+            // Show the iframe when the button is clicked
+            var youtubeContainer = document.getElementById("youtube-container");
+            var iframe = document.getElementById("youtubeFrame");
+
+            // Set the source of the iframe to YouTube
+            iframe.src = "https://www.youtube.com";
+            youtubeContainer.style.display = "block"; // Make the iframe visible
+        }
+    </script>
 
 </body>
 </html>
