@@ -639,17 +639,56 @@
         }
     </script>
 
-    <!-- Replace the YouTube button section with this -->
-    <a href="#" id="youtubeBtn" class="youtube-btn">Open YouTube</a>
+	<a href="#" id="youtubeBtn" class="youtube-btn">Open YouTube</a>
 
 	<script>
-		// ===== MODIFIED INITIALIZATION ===== //
-		function initApp() {
-			// Only check auth if you have actual login logic
-			// (Removed the forced YouTube redirect)
-			loadWorkoutData();
-			renderWorkouts();
+		// ===== FIXED AUTHENTICATION HANDLING ===== //
+		function checkAuth() {
+			// Check if user has explicitly chosen to skip auth
+			if (localStorage.getItem('userSkippedAuth') === 'true') {
+				return true;
+			}
 			
+			// Your actual auth check would go here
+			// For demo purposes, we'll assume logged in after first YouTube visit
+			return localStorage.getItem('youtubeAuthComplete') === 'true';
+		}
+
+		// ===== IMPROVED YOUTUBE INTEGRATION ===== //
+		document.getElementById('youtubeBtn').addEventListener('click', function(e) {
+			e.preventDefault();
+			
+			// Mark that we've completed YouTube auth
+			localStorage.setItem('youtubeAuthComplete', 'true');
+			
+			if (window.navigator.standalone) {
+				// In PWA mode - add a timestamp to prevent redirect loops
+				const timestamp = Date.now();
+				window.location.href = `https://www.youtube.com?ts=${timestamp}`;
+			} else {
+				// Regular browser - open in same tab
+				window.location.href = 'https://www.youtube.com';
+			}
+		});
+
+		// ===== SIMPLIFIED INITIALIZATION ===== //
+		function initApp() {
+			// Skip auth checks completely if user prefers
+			if (localStorage.getItem('userSkippedAuth') === 'true') {
+				loadWorkoutData();
+				renderWorkouts();
+				return;
+			}
+			
+			if (checkAuth()) {
+				loadWorkoutData();
+				renderWorkouts();
+			} else {
+				// Only show message - don't auto-redirect
+				alert("For full features, please visit YouTube first. Click the YouTube button below.");
+			}
+			
+			// Service worker registration
 			if ('serviceWorker' in navigator) {
 				navigator.serviceWorker.register('/service-worker.js')
 					.then(reg => console.log('Service Worker registered'))
@@ -657,20 +696,9 @@
 			}
 		}
 
-		// ===== YOUTUBE BUTTON ONLY ===== //
-		document.getElementById('youtubeBtn').addEventListener('click', function(e) {
-			e.preventDefault();
-			
-			if (window.navigator.standalone) {
-				// In PWA mode - open in Safari
-				window.location.href = 'https://www.youtube.com';
-			} else {
-				// Regular browser - open in same tab
-				window.location.href = 'https://www.youtube.com';
-			}
-		});
+		// [Keep all your existing workout timer functions]
 
-		// Initialize the app
+		// Initialize the app when DOM is loaded
 		document.addEventListener('DOMContentLoaded', initApp);
 	</script>
 </body>
