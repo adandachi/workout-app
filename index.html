@@ -1,20 +1,46 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<!-- The next too ensure opening the page in a separate browser on iPhone (PWA)-->
-	<!-- <meta name="apple-mobile-web-app-capable" content="yes">-->
-	<!-- <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">-->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link rel="manifest" href="/manifest.json">
     <title>Workout Timer</title>
     <style>
-        body { font-family: Arial, sans-serif; padding: 20px; background-color: #1c1c1c; color: #f4f4f4; text-align: center; }
-        h1 { color: #ffffff; }
-        .workout-container { max-width: 600px; margin: 0 auto; }
-        .workout { display: flex; flex-direction: column; justify-content: space-between; align-items: center; background: #2c2c2c; padding: 15px; border-radius: 8px; margin-bottom: 10px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); }
-        .workout span { text-align: center; font-size: 16px; font-weight: bold; margin-bottom: 10px; }
+        body { 
+            font-family: Arial, sans-serif; 
+            padding: 20px; 
+            background-color: #1c1c1c; 
+            color: #f4f4f4; 
+            text-align: center;
+            margin: 0;
+        }
+        h1 { 
+            color: #ffffff; 
+            margin-top: 0;
+        }
+        .workout-container { 
+            max-width: 600px; 
+            margin: 0 auto; 
+        }
+        .workout { 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: space-between; 
+            align-items: center; 
+            background: #2c2c2c; 
+            padding: 15px; 
+            border-radius: 8px; 
+            margin-bottom: 10px; 
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); 
+        }
+        .workout span { 
+            text-align: center; 
+            font-size: 16px; 
+            font-weight: bold; 
+            margin-bottom: 10px; 
+        }
         table { 
             width: 100%; 
             margin-top: 10px; 
@@ -82,10 +108,40 @@
         button:hover { background-color: #666; }
         .rest-button:hover { background-color: #f39c12; }
         .section-title { font-size: 18px; color: #f39c12; margin: 15px 0 5px 0; text-align: left; padding-left: 10px; }
-        .modal { display: none; position: fixed; z-index: 1; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7); overflow: auto; padding-top: 60px; }
-        .modal-content { background-color: #2c2c2c; margin: 5% auto; padding: 20px; border: 1px solid #888; width: 80%; max-width: 800px; border-radius: 8px; position: relative; }
-        .modal-content iframe { width: 100%; height: 400px; margin-top: 15px; }
-        .close { color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; }
+        .modal { 
+            display: none; 
+            position: fixed; 
+            z-index: 1; 
+            left: 0; 
+            top: 0; 
+            width: 100%; 
+            height: 100%; 
+            background-color: rgba(0, 0, 0, 0.7); 
+            overflow: auto; 
+            padding-top: 60px; 
+        }
+        .modal-content { 
+            background-color: #2c2c2c; 
+            margin: 5% auto; 
+            padding: 20px; 
+            border: 1px solid #888; 
+            width: 80%; 
+            max-width: 800px; 
+            border-radius: 8px; 
+            position: relative; 
+        }
+        .modal-content iframe { 
+            width: 100%; 
+            height: 400px; 
+            margin-top: 15px; 
+        }
+        .close { 
+            color: #aaa; 
+            float: right; 
+            font-size: 28px; 
+            font-weight: bold; 
+            cursor: pointer; 
+        }
         #muteBtn { 
             position: absolute; 
             top: 20px; 
@@ -138,6 +194,18 @@
         .exercise-description { margin-top: 15px; text-align: left; color: #bbb; }
         .completed-row { background-color: #27ae60 !important; opacity: 0.7; }
         .almost-done { animation: pulse 1s infinite; }
+        #enableSoundBtn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #555;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 1000;
+            border: 2px solid rgba(255,255,255,0.3);
+        }
         @keyframes pulse {
             0% { background-color: #d35400; }
             50% { background-color: #e74c3c; }
@@ -169,6 +237,12 @@
                 width: 35px; 
                 font-size: 12px;
             }
+            #enableSoundBtn {
+                bottom: 10px;
+                right: 10px;
+                padding: 8px 12px;
+                font-size: 12px;
+            }
         }
     </style>
 </head>
@@ -176,158 +250,197 @@
     <h1>Workout Timer</h1>
     
     <div class="controls-container">
-        <button class="reset-btn" onclick="resetWorkout()">Reset Workout</button>
-        <button class="summary-btn" onclick="showWorkoutSummary()">Show Summary</button>
+        <button class="reset-btn" id="resetBtn">Reset Workout</button>
+        <button class="summary-btn" id="summaryBtn">Show Summary</button>
     </div>
     
-    <div class="workout-container" id="workouts"></div>
+    <div class="workout-container" id="workouts">Loading workouts...</div>
 
     <div id="myModal" class="modal">
         <div class="modal-content">
-            <span class="close" onclick="closeModal()">&times;</span>
-            <button id="muteBtn" onclick="toggleMute()">Unmute</button>
+            <span class="close" id="closeModalBtn">&times;</span>
+            <button id="muteBtn">Unmute</button>
             <div id="exerciseInfo" class="exercise-description"></div>
             <iframe id="videoIframe" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen muted></iframe>
         </div>
     </div>
 
+    <button id="enableSoundBtn">Enable Sound</button>
+
     <script>
+        // Configuration
         const CONFIG = {
             warmupDuration: 30,
             workoutDuration: 40,
             restDuration: 20,
             setsPerWorkout: 3,
-			warmups: [
-				{ 
-					title: "1- Head Rotation", 
-					videoUrl: "https://www.youtube.com/embed/rzNBx_B4pQ4?autoplay=1&mute=1&start=22",
-				},
-				{ 
-					title: "2- Wrist Rotation", 
-					videoUrl: "https://www.youtube.com/embed/rzNBx_B4pQ4?autoplay=1&mute=1&start=54",
-				},
-				{ 
-					title: "3- Elbow Rotation", 
-					videoUrl: "https://www.youtube.com/embed/rzNBx_B4pQ4?autoplay=1&mute=1&start=85",
-				},
-				{ 
-					title: "4- Shoulders Rotation", 
-					videoUrl: "https://www.youtube.com/embed/rzNBx_B4pQ4?autoplay=1&mute=1&start=116",
-				},
-				{ 
-					title: "5- Upper Body Rotation", 
-					videoUrl: "https://www.youtube.com/embed/rzNBx_B4pQ4?autoplay=1&mute=1&start=148",
-				},
-				{ 
-					title: "6- T-Plank", 
-					videoUrl: "https://www.youtube.com/embed/rzNBx_B4pQ4?autoplay=1&mute=1&start=178",
-				},
-				{ 
-					title: "7- Hip Rotation (Right)", 
-					videoUrl: "https://www.youtube.com/embed/rzNBx_B4pQ4?autoplay=1&mute=1&start=210",
-				},
-				{ 
-					title: "8- Hip Rotation (Left)", 
-					videoUrl: "https://www.youtube.com/embed/rzNBx_B4pQ4?autoplay=1&mute=1&start=240",
-				},
-				{ 
-					title: "9- Sit Squats", 
-					videoUrl: "https://www.youtube.com/embed/rzNBx_B4pQ4?autoplay=1&mute=1&start=273",
-				},
-				{ 
-					title: "10- 1-2-3-4 Squats", 
-					videoUrl: "https://www.youtube.com/embed/rzNBx_B4pQ4?autoplay=1&mute=1&start=303",
-				},
-				{ 
-					title: "11- Jumping Jacks", 
-					videoUrl: "https://www.youtube.com/embed/rzNBx_B4pQ4?autoplay=1&mute=1&start=335",
-				}
-			],
+            warmups: [
+                { title: "1- Head Rotation", videoUrl: "https://www.youtube.com/embed/rzNBx_B4pQ4?autoplay=1&mute=1&start=22" },
+                { title: "2- Wrist Rotation", videoUrl: "https://www.youtube.com/embed/rzNBx_B4pQ4?autoplay=1&mute=1&start=54" },
+                { title: "3- Elbow Rotation", videoUrl: "https://www.youtube.com/embed/rzNBx_B4pQ4?autoplay=1&mute=1&start=85" },
+                { title: "4- Shoulders Rotation", videoUrl: "https://www.youtube.com/embed/rzNBx_B4pQ4?autoplay=1&mute=1&start=116" },
+                { title: "5- Upper Body Rotation", videoUrl: "https://www.youtube.com/embed/rzNBx_B4pQ4?autoplay=1&mute=1&start=148" },
+                { title: "6- T-Plank", videoUrl: "https://www.youtube.com/embed/rzNBx_B4pQ4?autoplay=1&mute=1&start=178" },
+                { title: "7- Hip Rotation (Right)", videoUrl: "https://www.youtube.com/embed/rzNBx_B4pQ4?autoplay=1&mute=1&start=210" },
+                { title: "8- Hip Rotation (Left)", videoUrl: "https://www.youtube.com/embed/rzNBx_B4pQ4?autoplay=1&mute=1&start=240" },
+                { title: "9- Sit Squats", videoUrl: "https://www.youtube.com/embed/rzNBx_B4pQ4?autoplay=1&mute=1&start=273" },
+                { title: "10- 1-2-3-4 Squats", videoUrl: "https://www.youtube.com/embed/rzNBx_B4pQ4?autoplay=1&mute=1&start=303" },
+                { title: "11- Jumping Jacks", videoUrl: "https://www.youtube.com/embed/rzNBx_B4pQ4?autoplay=1&mute=1&start=335" }
+            ],
             workouts: [
-                { 
-                    title: "1- Bench Press (Dumbbells)", 
-                    videoUrl: "https://www.youtube.com/embed/TAfR_IAv7JQ?autoplay=1&mute=1"
-                },
-                { 
-                    title: "2- Arnold Press (Dumbbells)", 
-                    videoUrl: "https://www.youtube.com/embed/Y_09W4XKDgY?autoplay=1&mute=1"
-                },
-                { 
-                    title: "3- Chest Fly (Dumbbells)", 
-                    videoUrl: "https://www.youtube.com/embed/_8mLd6uZhYU?autoplay=1&mute=1"
-                },
-                { 
-                    title: "4- Lateral Raise (Dumbbells)", 
-                    videoUrl: "https://www.youtube.com/embed/idJF1wmezDo?autoplay=1&mute=1"
-                },
-                { 
-                    title: "5- Triceps Kickbacks (Dumbbells)", 
-                    videoUrl: "https://www.youtube.com/embed/LwNbZkg-PpM?autoplay=1&mute=1"
-                },
-                { 
-                    title: "6- Triceps Extension (Dumbbells)", 
-                    videoUrl: "https://www.youtube.com/embed/aut2Vhqf5-A?autoplay=1&mute=1"
-                },
-                { 
-                    title: "7- Push Ups", 
-                    videoUrl: "https://www.youtube.com/embed/jrwvKKW1eh0?autoplay=1&mute=1"
-                },
-                { 
-                    title: "8- Front Raise (Dumbbells)", 
-                    videoUrl: "https://www.youtube.com/embed/9t6Z-UFntFM?autoplay=1&mute=1"
-                },
-                { 
-                    title: "9- Upright Row (Dumbbells)", 
-                    videoUrl: "https://www.youtube.com/embed/HF-ptqM0dw8?autoplay=1&mute=1"
-                }
+                { title: "1- Bench Press (Dumbbells)", videoUrl: "https://www.youtube.com/embed/TAfR_IAv7JQ?autoplay=1&mute=1" },
+                { title: "2- Arnold Press (Dumbbells)", videoUrl: "https://www.youtube.com/embed/Y_09W4XKDgY?autoplay=1&mute=1" },
+                { title: "3- Chest Fly (Dumbbells)", videoUrl: "https://www.youtube.com/embed/_8mLd6uZhYU?autoplay=1&mute=1" },
+                { title: "4- Lateral Raise (Dumbbells)", videoUrl: "https://www.youtube.com/embed/idJF1wmezDo?autoplay=1&mute=1" },
+                { title: "5- Triceps Kickbacks (Dumbbells)", videoUrl: "https://www.youtube.com/embed/LwNbZkg-PpM?autoplay=1&mute=1" },
+                { title: "6- Triceps Extension (Dumbbells)", videoUrl: "https://www.youtube.com/embed/aut2Vhqf5-A?autoplay=1&mute=1" },
+                { title: "7- Push Ups", videoUrl: "https://www.youtube.com/embed/jrwvKKW1eh0?autoplay=1&mute=1" },
+                { title: "8- Front Raise (Dumbbells)", videoUrl: "https://www.youtube.com/embed/9t6Z-UFntFM?autoplay=1&mute=1" },
+                { title: "9- Upright Row (Dumbbells)", videoUrl: "https://www.youtube.com/embed/HF-ptqM0dw8?autoplay=1&mute=1" }
             ]
         };
 
+        // State variables
         const timers = {};
         let workoutData = {};
-        let currentWarmupIndex = 0;
+        let audioContext;
+        let soundEnabled = false;
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set up event listeners
+            document.getElementById('resetBtn').addEventListener('click', resetWorkout);
+            document.getElementById('summaryBtn').addEventListener('click', showWorkoutSummary);
+            document.getElementById('closeModalBtn').addEventListener('click', closeModal);
+            document.getElementById('muteBtn').addEventListener('click', toggleMute);
+            document.getElementById('enableSoundBtn').addEventListener('click', enableSound);
+
+            // Initialize workout data and render
+            loadWorkoutData();
+            renderWorkouts();
+
+            // Initialize audio context on first user interaction
+            document.body.addEventListener('click', initAudio, { once: true });
+
+            // Hide sound button on non-iOS devices
+            if (!isIOS) {
+                document.getElementById('enableSoundBtn').style.display = 'none';
+                soundEnabled = true;
+            }
+        });
+
+        function initAudio() {
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                console.log("AudioContext initialized");
+            } catch (e) {
+                console.error("AudioContext failed:", e);
+            }
+        }
 
         function playTimerSound() {
+            if (!soundEnabled) return;
+            
             try {
-                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                const oscillator = audioCtx.createOscillator();
-                const gainNode = audioCtx.createGain();
-                
-                oscillator.connect(gainNode);
-                gainNode.connect(audioCtx.destination);
-                
-                oscillator.type = "sine";
-                oscillator.frequency.value = 800;
-                gainNode.gain.value = 0.5;
-                
-                oscillator.start();
-                oscillator.stop(audioCtx.currentTime + 0.3);
+                // First try Web Audio API
+                if (audioContext) {
+                    if (audioContext.state === 'suspended') {
+                        audioContext.resume().then(() => {
+                            playBeepSound();
+                        }).catch(e => {
+                            console.log("AudioContext resume failed:", e);
+                            playFallbackSound();
+                        });
+                    } else {
+                        playBeepSound();
+                    }
+                } else {
+                    playFallbackSound();
+                }
             } catch (e) {
-                const audio = new Audio('data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU...');
-                audio.play().catch(e => console.log("Audio play failed:", e));
+                console.error("Sound playback failed:", e);
+                playFallbackSound();
+            }
+        }
+
+        function playBeepSound() {
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.type = "sine";
+            oscillator.frequency.value = 800;
+            gainNode.gain.value = 0.5;
+            
+            oscillator.start();
+            oscillator.stop(audioContext.currentTime + 0.3);
+        }
+
+        function playFallbackSound() {
+            try {
+                const audio = new Audio();
+                audio.src = 'data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU...';
+                audio.volume = 0.5;
+                audio.play().catch(e => console.log("Fallback sound play failed:", e));
+            } catch (e) {
+                console.log("Fallback audio creation failed:", e);
+                if (navigator.vibrate) {
+                    navigator.vibrate([200]);
+                }
+            }
+        }
+
+        function enableSound() {
+            soundEnabled = true;
+            const btn = document.getElementById('enableSoundBtn');
+            btn.textContent = "Sound Enabled!";
+            btn.style.backgroundColor = "#28a745";
+            
+            // iOS requires playing a sound to unlock audio
+            try {
+                const audio = new Audio();
+                audio.volume = 0;
+                audio.play().then(() => {
+                    setTimeout(() => {
+                        btn.style.display = 'none';
+                    }, 1500);
+                });
+            } catch (e) {
+                console.log("Audio unlock failed:", e);
             }
         }
 
         function loadWorkoutData() {
-            const savedData = localStorage.getItem('workoutProgress');
-            workoutData = savedData ? JSON.parse(savedData) : { warmups: {}, workouts: {} };
-            
-            if (!workoutData.workouts) workoutData.workouts = {};
-            
-            CONFIG.workouts.forEach((_, index) => {
-                if (!workoutData.workouts[index]) {
-                    workoutData.workouts[index] = { lastWeight: null, sets: {}, completed: false };
-                    for (let set = 1; set <= CONFIG.setsPerWorkout; set++) {
-                        workoutData.workouts[index].sets[set] = { currentWeight: null, completed: false, lastWeight: null };
+            try {
+                const savedData = localStorage.getItem('workoutProgress');
+                workoutData = savedData ? JSON.parse(savedData) : { warmups: {}, workouts: {} };
+                
+                // Initialize data structure if empty
+                CONFIG.workouts.forEach((_, index) => {
+                    if (!workoutData.workouts[index]) {
+                        workoutData.workouts[index] = { sets: {} };
+                        for (let set = 1; set <= CONFIG.setsPerWorkout; set++) {
+                            workoutData.workouts[index].sets[set] = { 
+                                currentWeight: null, 
+                                completed: false, 
+                                lastWeight: null 
+                            };
+                        }
                     }
-                }
-            });
+                });
 
-            // NEW: Reset warmup completion status on page load
-            workoutData.warmups = {};
-            CONFIG.warmups.forEach((_, index) => {
-                workoutData.warmups[index] = { completed: false };
-            });
+                CONFIG.warmups.forEach((_, index) => {
+                    if (!workoutData.warmups[index]) {
+                        workoutData.warmups[index] = { completed: false };
+                    }
+                });
+            } catch (e) {
+                console.error("Error loading workout data:", e);
+                workoutData = { warmups: {}, workouts: {} };
+            }
         }
 
         function saveWorkoutData() {
@@ -344,6 +457,11 @@
 
         function renderWorkouts() {
             const container = document.getElementById("workouts");
+            if (!container) {
+                console.error("Workouts container not found!");
+                return;
+            }
+
             container.innerHTML = '';
 
             // Render Warm-ups
@@ -354,12 +472,12 @@
                 <table><tbody>
                     ${CONFIG.warmups.map((warmup, index) => `
                         <tr id="row-warmup-${index}" class="${workoutData.warmups[index]?.completed ? 'completed-row' : ''}">
-                            <td><span><a href="javascript:void(0);" onclick="openModal('warmup', ${index})">${warmup.title}</a></span></td>
+                            <td><span><a href="#" class="exercise-link" data-type="warmup" data-index="${index}">${warmup.title}</a></span></td>
                             <td class="timer" id="time-warmup-${index}">${CONFIG.warmupDuration}s</td>
                             <td>
                                 <div class="buttons-container">
-                                    <button id="toggle-warmup-${index}" class="start" onclick="toggleTimer('warmup', ${index})">Start</button>
-                                    <button class="stop" onclick="stopTimer('warmup', ${index})">Stop</button>
+                                    <button id="toggle-warmup-${index}" class="start">Start</button>
+                                    <button class="stop">Stop</button>
                                 </div>
                             </td>
                         </tr>
@@ -368,13 +486,17 @@
             `;
             container.appendChild(warmupDiv);
 
+            // Initialize warmup timers and event listeners
             CONFIG.warmups.forEach((_, index) => {
                 timers[`warmup-${index}`] = { 
                     time: CONFIG.warmupDuration, 
                     interval: null, 
                     running: false,
-                    paused: false
+                    paused: false 
                 };
+                
+                document.getElementById(`toggle-warmup-${index}`).addEventListener('click', () => toggleTimer('warmup', index));
+                document.querySelector(`#row-warmup-${index} .stop`).addEventListener('click', () => stopTimer('warmup', index));
             });
 
             // Render Workouts
@@ -398,7 +520,6 @@
                                     <span class="weight-label">Current</span>
                                     <input type="number" class="weight-input" id="weight-workout-${index}-${set}" 
                                         value="${currentWeight}" 
-                                        onchange="updateWeight('workout', ${index}, ${set}, this.value)"
                                         placeholder="lb">
                                 </div>
                             </td>
@@ -410,42 +531,63 @@
                             </td>
                             <td>
                                 <div class="buttons-container">
-                                    <button id="toggle-workout-${index}-${set}" class="start" onclick="toggleTimer('workout', ${index}, ${set})">Start</button>
-                                    <button class="stop" onclick="stopTimer('workout', ${index}, ${set})">Stop</button>
+                                    <button id="toggle-workout-${index}-${set}" class="start">Start</button>
+                                    <button class="stop">Stop</button>
                                 </div>
                             </td>
                         </tr>
                     `;
+                    
+                    // Initialize workout timers
                     timers[`workout-${index}-${set}`] = { 
                         time: CONFIG.workoutDuration, 
                         interval: null, 
                         running: false,
-                        paused: false
+                        paused: false 
                     };
                 }
 
                 div.innerHTML = `
-                    <span><a href="javascript:void(0);" onclick="openModal('workout', ${index})">${workout.title}</a></span>
+                    <span><a href="#" class="exercise-link" data-type="workout" data-index="${index}">${workout.title}</a></span>
                     <table><tbody>
                         ${setsHTML}
                         <tr id="row-workout-${index}-break">
                             <td colspan="5">
-                                <button id="rest-button-workout-${index}" class="rest-button" onclick="startRestTimer('workout', ${index})"><span>REST</span></button>
+                                <button id="rest-button-workout-${index}" class="rest-button"><span>REST</span></button>
                             </td>
                         </tr>
                     </tbody></table>
                 `;
                 container.appendChild(div);
+
+                // Add event listeners for workout sets
+                for (let set = 1; set <= CONFIG.setsPerWorkout; set++) {
+                    document.getElementById(`toggle-workout-${index}-${set}`).addEventListener('click', () => toggleTimer('workout', index, set));
+                    document.querySelector(`#row-workout-${index}-${set} .stop`).addEventListener('click', () => stopTimer('workout', index, set));
+                    document.getElementById(`weight-workout-${index}-${set}`).addEventListener('change', (e) => {
+                        updateWeight('workout', index, set, e.target.value);
+                    });
+                }
+
+                document.getElementById(`rest-button-workout-${index}`).addEventListener('click', () => startRestTimer('workout', index));
+            });
+
+            // Add event listeners for exercise links
+            document.querySelectorAll('.exercise-link').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const type = this.getAttribute('data-type');
+                    const index = parseInt(this.getAttribute('data-index'));
+                    openModal(type, index);
+                });
             });
         }
 
         function openModal(type, index) {
             const modal = document.getElementById("myModal");
             const iframe = document.getElementById("videoIframe");
-            const exerciseInfo = document.getElementById("exerciseInfo");
             const exercises = type === 'warmup' ? CONFIG.warmups : CONFIG.workouts;
             iframe.src = exercises[index].videoUrl;
-            exerciseInfo.innerHTML = exercises[index].description;
             modal.style.display = "block";
         }
 
@@ -468,11 +610,11 @@
             const row = document.getElementById(`row-${timerId}`);
             
             if (!timer.running && !timer.paused) {
-                // Start
+                // Start timer
                 timer.running = true;
                 button.textContent = "Pause";
                 button.className = "pause";
-                document.querySelectorAll(`[id^="row-${type}"]`).forEach(row => row.classList.remove("highlight-row"));
+                document.querySelectorAll(`[id^="row-${type}"]`).forEach(r => r.classList.remove("highlight-row"));
                 row.classList.add("highlight-row");
                 
                 timer.interval = setInterval(() => {
@@ -492,14 +634,13 @@
                         button.className = "start";
                         
                         playTimerSound();
+                        
+                        // Update completion status
                         if (type === 'warmup') {
                             workoutData.warmups[index].completed = true;
                             saveWorkoutData();
-                            // Automatically start next warmup if available
                             if (index < CONFIG.warmups.length - 1) {
-                                setTimeout(() => {
-                                    toggleTimer('warmup', index + 1);
-                                }, 1000);
+                                setTimeout(() => toggleTimer('warmup', index + 1), 1000);
                             }
                         } else {
                             workoutData.workouts[index].sets[setIndex].completed = true;
@@ -512,7 +653,7 @@
                     }
                 }, 1000);
             } else if (timer.running) {
-                // Pause
+                // Pause timer
                 clearInterval(timer.interval);
                 timer.running = false;
                 timer.paused = true;
@@ -520,7 +661,7 @@
                 button.className = "start";
                 row.classList.remove("almost-done");
             } else {
-                // Resume
+                // Resume timer
                 timer.running = true;
                 timer.paused = false;
                 button.textContent = "Pause";
@@ -543,14 +684,12 @@
                         button.className = "start";
                         
                         playTimerSound();
+                        
                         if (type === 'warmup') {
                             workoutData.warmups[index].completed = true;
                             saveWorkoutData();
-                            // Automatically start next warmup if available
                             if (index < CONFIG.warmups.length - 1) {
-                                setTimeout(() => {
-                                    toggleTimer('warmup', index + 1);
-                                }, 1000);
+                                setTimeout(() => toggleTimer('warmup', index + 1), 1000);
                             }
                         } else {
                             workoutData.workouts[index].sets[setIndex].completed = true;
@@ -620,14 +759,13 @@
                   `Keep up the good work!`);
         }
 
-        // Initialize
-        loadWorkoutData();
-        renderWorkouts();
-
+        // Register service worker if available
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/service-worker.js')
-                .then(reg => console.log('Service Worker registered'))
-                .catch(err => console.log('Service Worker failed', err));
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(reg => console.log('Service Worker registered'))
+                    .catch(err => console.log('Service Worker failed', err));
+            });
         }
     </script>
 </body>
