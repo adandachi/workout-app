@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="manifest" href="/manifest.json">
+    <title>Day 2 - Pull (Biceps, Back, Rear Delts)</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            padding: 20px; 
+            background-color: #1c1c1c; 
+            color: #f4f4f4; 
+            text-align: center;
+            margin: 0;
+        }
+        h1 { 
+            color: #ffffff; 
+            margin-top: 0;
+        }
+        .workout-container { 
+            max-width: 600px; 
+            margin: 0 auto; 
+        }
+        .workout { 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: space-between; 
+            align-items: center; 
+            background: #2c2c2c; 
+            padding: 15px; 
+            border-radius: 8px; 
+            margin-bottom: 10px; 
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); 
+        }
+        .workout span { 
+            text-align: center; 
+            font-size: 16px; 
+            font-weight: bold; 
+            margin-bottom: 10px; 
+        }
+        table { 
+            width: 100%; 
+            margin-top: 10px; 
+            border-collapse: collapse; 
+            table-layout: fixed;
+        }
+        td { 
+            padding: 8px 5px;
+            text-align: center; 
+            font-size: 14px;
+            border: 1px solid #444; 
+        }
+        .timer { 
+            font-size: 16px;
+            font-weight: bold; 
+            padding-bottom: 0;
+        }
+        button { 
+            padding: 10px; 
+            border: none; 
+            border-radius: 50%; 
+            cursor: pointer; 
+            font-weight: bold; 
+            width: 50px; 
+            height: 50px; 
+            margin: 0 5px; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            text-align: center; 
+            border: 2px solid rgba(255,255,255,0.3);
+            font-size: 14px;
+        }
+        .start { background: #28a745; color: white; }
+        .pause { background: #ffc107; color: black; }
+        .stop { background: #dc3545; color: white; }
+        .highlight-row { background-color: #8e44ad; color: white; }
+        .break-timer { font-size: 18px; color: #bbb; height: 40px; line-height: 40px; padding: 0; }
+        .rest-button { 
+            font-size: 12px; 
+            background-color: #f39c12; 
+            color: white; 
+            padding: 0; 
+            border: none; 
+            cursor: pointer; 
+            border-radius: 50%; 
+            width: 50px; 
+            height: 50px; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            line-height: 1.2; 
+            text-align: center; 
+            box-sizing: border-box; 
+            transition: background-color 0.3s ease; 
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+        .rest-button:disabled { background-color: #666; }
+        .rest-button span { font-size: 12px; text-align: center; }
+        td .rest-button { width: 50px; height: 50px; margin: 0 auto; }
+        .workout, .timer, td { color: #f4f4f4; }
+        .highlight-row { background-color: #d35400; }
+        .completed { background-color: #2980b9; }
+        button { transition: background-color 0.3s; }
+        button:hover { background-color: #666; }
+        .rest-button:hover { background-color: #f39c12; }
+        .section-title { font-size: 18px; color: #f39c12; margin: 15px 0 5px 0; text-align: left; padding-left: 10px; }
+        .modal { 
+            display: none; 
+            position: fixed; 
+            z-index: 1; 
+            left: 0; 
+            top: 0; 
+            width: 100%; 
+            height: 100%; 
+            background-color: rgba(0, 0, 0, 0.7); 
+            overflow: auto; 
+            padding-top: 60px; 
+        }
+        .modal-content { 
+            background-color: #2c2c2c; 
+            margin: 5% auto; 
+            padding: 20px; 
+            border: 1px solid #888; 
+            width: 80%; 
+            max-width: 800px; 
+            border-radius: 8px; 
+            position: relative; 
+        }
+        .modal-content iframe { 
+            width: 100%; 
+            height: 400px; 
+            margin-top: 15px; 
+        }
+        .close { 
+            color: #aaa; 
+            float: right; 
+            font-size: 28px; 
+            font-weight: bold; 
+            cursor: pointer; 
+        }
+        #muteBtn { 
+            position: absolute; 
+            top: 20px; 
+            left: 20px; 
+            background: #555; 
+            color: white; 
+            border: none; 
+            padding: 8px 15px; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+        a { color: #00bcd4; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .buttons-container { display: flex; justify-content: center; align-items: center; }
+        .weight-input { 
+            width: 40px; 
+            padding: 3px; 
+            text-align: center; 
+            background: #3c3c3c; 
+            border: 1px solid #555; 
+            color: white; 
+            border-radius: 4px; 
+            border: 1px solid rgba(255,255,255,0.2);
+            font-size: 14px;
+        }
+        .weight-label { font-size: 10px; color: #bbb; margin-bottom: 3px; }
+        .weight-container { display: flex; flex-direction: column; align-items: center; margin: 0 10px; }
+        .controls-container { margin: 20px 0; }
+        .reset-btn { 
+            background: #7f8c8d; 
+            color: white; 
+            border: none; 
+            padding: 10px 15px; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            margin: 0 10px; 
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+        .summary-btn { 
+            background: #3498db; 
+            color: white; 
+            border: none; 
+            padding: 10px 15px; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            margin: 0 10px; 
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+        .exercise-description { margin-top: 15px; text-align: left; color: #bbb; }
+        .completed-row { background-color: #27ae60 !important; opacity: 0.7; }
+        .almost-done { animation: pulse 1s infinite; }
+        #enableSoundBtn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #555;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 1000;
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+        @keyframes pulse {
+            0% { background-color: #d35400; }
+            50% { background-color: #e74c3c; }
+            100% { background-color: #d35400; }
+        }
+        @media (max-width: 600px) {
+            .buttons-container { flex-direction: column; }
+            button { margin: 5px 0; }
+            td { 
+                padding: 5px 3px;
+                font-size: 12px;
+            }
+            .timer { 
+                font-size: 14px;
+            }
+            button { 
+                padding: 8px; 
+                width: 45px; 
+                height: 45px; 
+                margin: 0 2px;
+                font-size: 12px;
+            }
+            .rest-button { 
+                width: 45px; 
+                height: 45px; 
+                font-size: 11px;
+            }
+            .weight-input { 
+                width: 35px; 
+                font-size: 12px;
+            }
+            #enableSoundBtn {
+                bottom: 10px;
+                right: 10px;
+                padding: 8px 12px;
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Day 2 - Pull (Biceps, Back, Rear Delts)</h1>
+    
+    <div class="controls-container">
+        <button class="reset-btn" id="resetBtn">Reset Workout</button>
+        <button class="summary-btn" id="summaryBtn">Show Summary</button>
+    </div>
+    
+    <div class="workout-container" id="workouts">Loading workouts...</div>
+
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="closeModalBtn">&times;</span>
+            <button id="muteBtn">Unmute</button>
+            <div id="exerciseInfo" class="exercise-description"></div>
+            <iframe id="videoIframe" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen muted></iframe>
+        </div>
+    </div>
+
+    <button id="enableSoundBtn">Enable Sound</button>
+
+    <script>
+        // Configuration
+        const CONFIG = {
+            warmupDuration: 30,
+            workoutDuration: 40,
+            restDuration: 20,
+            setsPerWorkout: 3,
+            warmups: [
+                { title: "1- Head Rotation", videoUrl: "https://www.youtube.com/embed/rzNBx_B4pQ4?autoplay=1&mute=1&start=22" },
+                { title: "2- Wrist Rotation", videoUrl: "https://www.youtube.com/embed/rzNBx_B4pQ4?autoplay=1&mute=1&start=54" },
+                { title: "3- Elbow Rotation", videoUrl: "https://www.youtube.com/embed/rzNBx_B4pQ4?autoplay=1&mute=1&start=85" },
+                { title: "4- Shoulders Rotation", videoUrl: "https://www.youtube.com/embed/rzNBx_B4pQ4?autoplay=1&mute=1&start=116" },
+                { title: "5- Upper Body Rotation", videoUrl: "https://www.youtube.com/embed/rzNBx_B4pQ4?autoplay=1&mute=1&start=148" },
+                { title: "6- T-Plank", videoUrl: "https://www.youtube.com/embed/rzNBx_B4pQ4?autoplay=1&mute=1&start=178" },
+                { title: "7- Hip Rotation (Right)", videoUrl: "https://www.youtube.com/embed/rzNBx_B4pQ4?autoplay=1&mute=1&start=210" },
+                { title: "8- Hip Rotation (Left)", videoUrl: "https://www.youtube.com/embed/rzNBx_B4pQ4?autoplay=1&mute=1&start=240" },
+                { title: "9- Sit Squats", videoUrl: "https://www.youtube.com/embed/rzNBx_B4pQ4?autoplay=1&mute=1&start=273" },
+                { title: "10- 1-2-3-4 Squats", videoUrl: "https://www.youtube.com/embed/rzNBx_B4pQ4?autoplay=1&mute=1&start=303" },
+                { title: "11- Jumping Jacks", videoUrl: "https://www.youtube.com/embed/rzNBx_B4pQ4?autoplay=1&mute=1&start=335" }
+            ],
+            workouts: [
+                { title: "1- Biceps Curls", videoUrl: "https://www.youtube.com/embed/jXplrDCRrYQ?autoplay=1&mute=1&start=3" },
+                { title: "2- Hammer Curls", videoUrl: "https://www.youtube.com/embed/jXplrDCRrYQ?autoplay=1&mute=1" },
+                { title: "3- Concentration Curls", videoUrl: "https://www.youtube.com/embed/k4T6GwIzc40?autoplay=1&mute=1&start=7" },
+                { title: "4- Bent Over One Arm Row", videoUrl: "https://www.youtube.com/embed/q65uDGJ9ZPs?autoplay=1&mute=1&start=17" },
+                { title: "5- Incline Row", videoUrl: "https://www.youtube.com/embed/FiQ1X4jaaCY?autoplay=1&mute=1" },
+                { title: "6- Bent Over Row", videoUrl: "https://www.youtube.com/embed/uvTwdzYAS3k?autoplay=1&mute=1" },
+                { title: "7- Reverse Fly", videoUrl: "https://www.youtube.com/embed/MQ2A47nA0-U?autoplay=1&mute=1" },
+                { title: "8- Upright Row", videoUrl: "https://www.youtube.com/embed/_gv9nRSKhpA?autoplay=1&mute=1" },
+                { title: "9- Shrug", videoUrl: "https://www.youtube.com/embed/-z8KQsG6iV8?autoplay=1&mute=1" }
+            ]
+        };
+
+        // State variables
+        const timers = {};
+        let workoutData = {};
+        let audioContext;
+        let soundEnabled = false;
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set up event listeners
+            document.getElementById('resetBtn').addEventListener('click', resetWorkout);
+            document.getElementById('summaryBtn').addEventListener('click', showWorkoutSummary);
+            document.getElementById('closeModalBtn').addEventListener('click', closeModal);
+            document.getElementById('muteBtn').addEventListener('click', toggleMute);
+            document.getElementById('enableSoundBtn').addEventListener('click', enableSound);
+
+            // Initialize workout data and render
+            loadWorkoutData();
+            renderWorkouts();
+
+            // Initialize audio context on first user interaction
+            document.body.addEventListener('click', initAudio, { once: true });
+
+            // Hide sound button on non-iOS devices
+            if (!isIOS) {
+                document.getElementById('enableSoundBtn').style.display = 'none';
+                soundEnabled = true;
+            }
+        });
+
+        function initAudio() {
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                console.log("AudioContext initialized");
+            } catch (e) {
+                console.error("AudioContext failed:", e);
+            }
+        }
+
+        function playTimerSound() {
+            if (!soundEnabled) return;
+            
+            try {
+                // First try Web Audio API
+                if (audioContext) {
+                    if (audioContext.state === 'suspended') {
+                        audioContext.resume().then(() => {
+                            playBeepSound();
+                        }).catch(e => {
+                            console.log("AudioContext resume failed:", e);
+                            playFallbackSound();
+                        });
+                    } else {
+                        playBeepSound();
+                    }
+                } else {
+                    playFallbackSound();
+                }
+            } catch (e) {
+                console.error("Sound playback failed:", e);
+                playFallbackSound();
+            }
+        }
+
+        function playBeepSound() {
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.type = "sine";
+            oscillator.frequency.value = 800;
+            gainNode.gain.value = 0.5;
+            
+            oscillator.start();
+            oscillator.stop(audioContext.currentTime + 0.3);
+        }
+
+        function playFallbackSound() {
+            try {
+                const audio = new Audio();
+                audio.src = 'data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU...';
+                audio.volume = 0.5;
+                audio.play().catch(e => console.log("Fallback sound play failed:", e));
+            } catch (e) {
+                console.log("Fallback audio creation failed:", e);
+                if (navigator.vibrate) {
+                    navigator.vibrate([200]);
+                }
+            }
+        }
+
+        function enableSound() {
+            soundEnabled = true;
+            const btn = document.getElementById('enableSoundBtn');
+            btn.textContent = "Sound Enabled!";
+            btn.style.backgroundColor = "#28a745";
+            
+            // iOS requires playing a sound to unlock audio
+            try {
+                const audio = new Audio();
+                audio.volume = 0;
+                audio.play().then(() => {
+                    setTimeout(() => {
+                        btn.style.display = 'none';
+                    }, 1500);
+                });
+            } catch (e) {
+                console.log("Audio unlock failed:", e);
+            }
+        }
+
+        function loadWorkoutData() {
+            try {
+                const savedData = localStorage.getItem('workoutProgress');
+                workoutData = savedData ? JSON.parse(savedData) : { warmups: {}, workouts: {} };
+                
+                // Initialize data structure if empty
+                CONFIG.workouts.forEach((_, index) => {
+                    if (!workoutData.workouts[index]) {
+                        workoutData.workouts[index] = { sets: {} };
+                        for (let set = 1; set <= CONFIG.setsPerWorkout; set++) {
+                            workoutData.workouts[index].sets[set] = { 
+                                currentWeight: null, 
+                                completed: false, 
+                                lastWeight: null 
+                            };
+                        }
+                    }
+                });
+
+                CONFIG.warmups.forEach((_, index) => {
+                    if (!workoutData.warmups[index]) {
+                        workoutData.warmups[index] = { completed: false };
+                    }
+                });
+            } catch (e) {
+                console.error("Error loading workout data:", e);
+                workoutData = { warmups: {}, workouts: {} };
+            }
+        }
+
+        function saveWorkoutData() {
+            localStorage.setItem('workoutProgress', JSON.stringify(workoutData));
+        }
+
+        function updateWeight(type, index, setIndex, weight) {
+            if (type === 'workout') {
+                workoutData.workouts[index].sets[setIndex].currentWeight = weight;
+                workoutData.workouts[index].sets[setIndex].lastWeight = weight;
+                saveWorkoutData();
+            }
+        }
+
+        function renderWorkouts() {
+            const container = document.getElementById("workouts");
+            if (!container) {
+                console.error("Workouts container not found!");
+                return;
+            }
+
+            container.innerHTML = '';
+
+            // Render Warm-ups
+            const warmupDiv = document.createElement("div");
+            warmupDiv.className = "workout";
+            warmupDiv.innerHTML = `
+                <div class="section-title">WARM-UP</div>
+                <table><tbody>
+                    ${CONFIG.warmups.map((warmup, index) => `
+                        <tr id="row-warmup-${index}" class="${workoutData.warmups[index]?.completed ? 'completed-row' : ''}">
+                            <td><span><a href="#" class="exercise-link" data-type="warmup" data-index="${index}">${warmup.title}</a></span></td>
+                            <td class="timer" id="time-warmup-${index}">${CONFIG.warmupDuration}s</td>
+                            <td>
+                                <div class="buttons-container">
+                                    <button id="toggle-warmup-${index}" class="start">Start</button>
+                                    <button class="stop">Stop</button>
+                                </div>
+                            </td>
+                        </tr>
+                    `).join('')}
+                </tbody></table>
+            `;
+            container.appendChild(warmupDiv);
+
+            // Initialize warmup timers and event listeners
+            CONFIG.warmups.forEach((_, index) => {
+                timers[`warmup-${index}`] = { 
+                    time: CONFIG.warmupDuration, 
+                    interval: null, 
+                    running: false,
+                    paused: false 
+                };
+                
+                document.getElementById(`toggle-warmup-${index}`).addEventListener('click', () => toggleTimer('warmup', index));
+                document.querySelector(`#row-warmup-${index} .stop`).addEventListener('click', () => stopTimer('warmup', index));
+            });
+
+            // Render Workouts
+            CONFIG.workouts.forEach((workout, index) => {
+                const div = document.createElement("div");
+                div.className = "workout";
+                div.id = `workout-${index}`;
+
+                let setsHTML = '';
+                for (let set = 1; set <= CONFIG.setsPerWorkout; set++) {
+                    const currentWeight = workoutData.workouts[index]?.sets[set]?.currentWeight || '';
+                    const lastWeight = workoutData.workouts[index]?.sets[set]?.lastWeight || '';
+                    const isCompleted = workoutData.workouts[index]?.sets[set]?.completed || false;
+                    
+                    setsHTML += `
+                        <tr id="row-workout-${index}-${set}" class="${isCompleted ? 'completed-row' : ''}">
+                            <td><span>Set ${set}</span></td>
+                            <td class="timer" id="time-workout-${index}-${set}">${CONFIG.workoutDuration}s</td>
+                            <td>
+                                <div class="weight-container">
+                                    <span class="weight-label">Current</span>
+                                    <input type="number" class="weight-input" id="weight-workout-${index}-${set}" 
+                                        value="${currentWeight}" 
+                                        placeholder="lb">
+                                </div>
+                            </td>
+                            <td>
+                                <div class="weight-container">
+                                    <span class="weight-label">Last</span>
+                                    <input type="text" class="weight-input" value="${lastWeight}" readonly>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="buttons-container">
+                                    <button id="toggle-workout-${index}-${set}" class="start">Start</button>
+                                    <button class="stop">Stop</button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                    
+                    // Initialize workout timers
+                    timers[`workout-${index}-${set}`] = { 
+                        time: CONFIG.workoutDuration, 
+                        interval: null, 
+                        running: false,
+                        paused: false 
+                    };
+                }
+
+                div.innerHTML = `
+                    <span><a href="#" class="exercise-link" data-type="workout" data-index="${index}">${workout.title}</a></span>
+                    <table><tbody>
+                        ${setsHTML}
+                        <tr id="row-workout-${index}-break">
+                            <td colspan="5">
+                                <button id="rest-button-workout-${index}" class="rest-button"><span>REST</span></button>
+                            </td>
+                        </tr>
+                    </tbody></table>
+                `;
+                container.appendChild(div);
+
+                // Add event listeners for workout sets
+                for (let set = 1; set <= CONFIG.setsPerWorkout; set++) {
+                    document.getElementById(`toggle-workout-${index}-${set}`).addEventListener('click', () => toggleTimer('workout', index, set));
+                    document.querySelector(`#row-workout-${index}-${set} .stop`).addEventListener('click', () => stopTimer('workout', index, set));
+                    document.getElementById(`weight-workout-${index}-${set}`).addEventListener('change', (e) => {
+                        updateWeight('workout', index, set, e.target.value);
+                    });
+                }
+
+                document.getElementById(`rest-button-workout-${index}`).addEventListener('click', () => startRestTimer('workout', index));
+            });
+
+            // Add event listeners for exercise links
+            document.querySelectorAll('.exercise-link').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const type = this.getAttribute('data-type');
+                    const index = parseInt(this.getAttribute('data-index'));
+                    openModal(type, index);
+                });
+            });
+        }
+
+        function openModal(type, index) {
+            const modal = document.getElementById("myModal");
+            const iframe = document.getElementById("videoIframe");
+            const exercises = type === 'warmup' ? CONFIG.warmups : CONFIG.workouts;
+            iframe.src = exercises[index].videoUrl;
+            modal.style.display = "block";
+        }
+
+        function closeModal() {
+            document.getElementById("myModal").style.display = "none";
+            document.getElementById("videoIframe").src = "";
+        }
+
+        function toggleMute() {
+            const iframe = document.getElementById("videoIframe");
+            const btn = document.getElementById("muteBtn");
+            iframe.muted = !iframe.muted;
+            btn.textContent = iframe.muted ? "Unmute" : "Mute";
+        }
+
+        function toggleTimer(type, index, setIndex = null) {
+            const timerId = setIndex ? `${type}-${index}-${setIndex}` : `${type}-${index}`;
+            const timer = timers[timerId];
+            const button = document.getElementById(`toggle-${timerId}`);
+            const row = document.getElementById(`row-${timerId}`);
+            
+            if (!timer.running && !timer.paused) {
+                // Start timer
+                timer.running = true;
+                button.textContent = "Pause";
+                button.className = "pause";
+                document.querySelectorAll(`[id^="row-${type}"]`).forEach(r => r.classList.remove("highlight-row"));
+                row.classList.add("highlight-row");
+                
+                timer.interval = setInterval(() => {
+                    timer.time--;
+                    document.getElementById(`time-${timerId}`).textContent = `${timer.time}s`;
+                    
+                    if (timer.time <= 5) {
+                        row.classList.add("almost-done");
+                    }
+                    
+                    if (timer.time <= 0) {
+                        clearInterval(timer.interval);
+                        timer.running = false;
+                        row.classList.remove("highlight-row", "almost-done");
+                        row.classList.add("completed");
+                        button.textContent = "Start";
+                        button.className = "start";
+                        
+                        playTimerSound();
+                        
+                        // Update completion status
+                        if (type === 'warmup') {
+                            workoutData.warmups[index].completed = true;
+                            saveWorkoutData();
+                            if (index < CONFIG.warmups.length - 1) {
+                                setTimeout(() => toggleTimer('warmup', index + 1), 1000);
+                            }
+                        } else {
+                            workoutData.workouts[index].sets[setIndex].completed = true;
+                            const allSetsCompleted = Object.values(workoutData.workouts[index].sets).every(s => s.completed);
+                            if (allSetsCompleted) {
+                                workoutData.workouts[index].completed = true;
+                            }
+                            saveWorkoutData();
+                        }
+                    }
+                }, 1000);
+            } else if (timer.running) {
+                // Pause timer
+                clearInterval(timer.interval);
+                timer.running = false;
+                timer.paused = true;
+                button.textContent = "Start";
+                button.className = "start";
+                row.classList.remove("almost-done");
+            } else {
+                // Resume timer
+                timer.running = true;
+                timer.paused = false;
+                button.textContent = "Pause";
+                button.className = "pause";
+                
+                timer.interval = setInterval(() => {
+                    timer.time--;
+                    document.getElementById(`time-${timerId}`).textContent = `${timer.time}s`;
+                    
+                    if (timer.time <= 5) {
+                        row.classList.add("almost-done");
+                    }
+                    
+                    if (timer.time <= 0) {
+                        clearInterval(timer.interval);
+                        timer.running = false;
+                        row.classList.remove("highlight-row", "almost-done");
+                        row.classList.add("completed");
+                        button.textContent = "Start";
+                        button.className = "start";
+                        
+                        playTimerSound();
+                        
+                        if (type === 'warmup') {
+                            workoutData.warmups[index].completed = true;
+                            saveWorkoutData();
+                            if (index < CONFIG.warmups.length - 1) {
+                                setTimeout(() => toggleTimer('warmup', index + 1), 1000);
+                            }
+                        } else {
+                            workoutData.workouts[index].sets[setIndex].completed = true;
+                            const allSetsCompleted = Object.values(workoutData.workouts[index].sets).every(s => s.completed);
+                            if (allSetsCompleted) {
+                                workoutData.workouts[index].completed = true;
+                            }
+                            saveWorkoutData();
+                        }
+                    }
+                }, 1000);
+            }
+        }
+
+        function stopTimer(type, index, setIndex = null) {
+            const timerId = setIndex ? `${type}-${index}-${setIndex}` : `${type}-${index}`;
+            const timer = timers[timerId];
+            const button = document.getElementById(`toggle-${timerId}`);
+            const row = document.getElementById(`row-${timerId}`);
+            
+            clearInterval(timer.interval);
+            timer.running = false;
+            timer.paused = false;
+            timer.time = type === 'warmup' ? CONFIG.warmupDuration : CONFIG.workoutDuration;
+            document.getElementById(`time-${timerId}`).textContent = `${timer.time}s`;
+            row.classList.remove("highlight-row", "almost-done");
+            button.textContent = "Start";
+            button.className = "start";
+        }
+
+        function startRestTimer(type, index) {
+            const button = document.getElementById(`rest-button-${type}-${index}`);
+            button.disabled = true;
+            let timeLeft = CONFIG.restDuration;
+            
+            const timer = setInterval(() => {
+                button.innerHTML = `REST ${timeLeft}s`;
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    button.innerHTML = "REST";
+                    button.disabled = false;
+                    playTimerSound();
+                }
+                timeLeft--;
+            }, 1000);
+        }
+
+        function resetWorkout() {
+            if (confirm("Are you sure you want to reset all workout progress? This cannot be undone.")) {
+                localStorage.removeItem('workoutProgress');
+                location.reload();
+            }
+        }
+
+        function showWorkoutSummary() {
+            const completedWarmups = Object.values(workoutData.warmups).filter(w => w.completed).length;
+            const completedWorkouts = Object.values(workoutData.workouts).filter(w => 
+                Object.values(w.sets).every(s => s.completed)
+            ).length;
+            
+            const totalWarmups = CONFIG.warmups.length;
+            const totalWorkouts = CONFIG.workouts.length;
+            
+            alert(`Workout Summary:\n\n` +
+                  `Warm-ups: ${completedWarmups}/${totalWarmups} completed\n` +
+                  `Workouts: ${completedWorkouts}/${totalWorkouts} completed\n\n` +
+                  `Keep up the good work!`);
+        }
+
+        // Register service worker if available
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(reg => console.log('Service Worker registered'))
+                    .catch(err => console.log('Service Worker failed', err));
+            });
+        }
+    </script>
+</body>
+</html>
