@@ -1,13 +1,56 @@
-<html>
-	<head>
-		<meta name="apple-mobile-web-app-capable" content="yes">
-		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-		<meta charset="UTF-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-	</head>
-	<body>
-		<a href=001_Push.html>Day 1 - Push (Chest, Shoulders, Triceps)</a href><br>
-		<a href=002_Pull.html>Day 2 - Pull (Biceps, Back, Rear Delts)</a href><br>
-		<a href=003_Legs.html>Day 3 - Others (Legs, Abs)</a href>
-	</body>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Workout PWA</title>
+
+    <link rel="manifest" href="data:application/json,{
+        &quot;name&quot;: &quot;Workout PWA&quot;,
+        &quot;short_name&quot;: &quot;Workout&quot;,
+        &quot;start_url&quot;: &quot;index.html&quot;,
+        &quot;display&quot;: &quot;standalone&quot;,
+        &quot;background_color&quot;: &quot;#ffffff&quot;,
+        &quot;theme_color&quot;: &quot;#000000&quot;,
+        &quot;icons&quot;: [
+            {
+                &quot;src&quot;: &quot;data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABz0lEQVR42qWTz0tUURTH/4+zO7szbTYzJ1srYVopXio1zZgJZK5caUQ4uKgNJbGxCltqolSmxWzXqipMTVoFSNpEmqtAS3KwtbSYjoYRJbrx1jZZltd9drDnnnhG2PvO+Z3fOOc65g9jFzPyW3X9GxHB7ih1pjOf1xJTZ/NnDdbOHR5GB3fcMY0XZGyzgY5oRzv5xiVffR1mabEwMrOXWBR+syGV6SvoZoTpGuPVJtn01yU+b5s2GGp7U5m09HG/BBRTvXo4u3AKkJ6YrHQ3kqByD25sMWlppW0NpMzL9xlyJGeuElvtfNqWV59BlXMNnbllVp4uNJ2L/FKnFr56OHV2RTWFXLEszsPMQZhXwFXHFfbHVfVRsbtjrt0TE21qIxtIx2SHvh6+NPcZG4xJeC7iXq0MtXL0XqN5HEu1ymFcvrfpD7hEIQOpmbRRiFq3iOpGyoovSEkwT3ggNnW9OVxsg0SnI+YVZ4nXWaBSb68FupxOSVbnHPhUpUjqdmRJUZzliylxGgUjlMR8IZM1Wiys2U77jjqTSTi/JwOtu53DPzRx1TND0LoOSzW1ov7t5OPlX5prFURP5fYmnvH2Cf3PPsmnwvRrKNU9J2+lpLeDBylmwZuHi9B9b/5iTth//tv2bZfJre54JXs5iLfQAAAABJRU5ErkJggg==&quot;,
+                &quot;sizes&quot;: &quot;64x64&quot;,
+                &quot;type&quot;: &quot;image/png&quot;
+            }
+        ]
+    }">
+
+    <script>
+        if ("serviceWorker" in navigator) {
+            navigator.serviceWorker.register("data:text/javascript," + encodeURIComponent(`
+                self.addEventListener("install", (event) => {
+                    event.waitUntil(
+                        caches.open("pwa-cache").then((cache) => {
+                            return cache.addAll([
+                                "index.html"
+                            ]);
+                        })
+                    );
+                });
+
+                self.addEventListener("fetch", (event) => {
+                    event.respondWith(
+                        caches.match(event.request).then((response) => {
+                            return response || fetch(event.request);
+                        })
+                    );
+                });
+            `)).then(() => console.log("Service Worker Registered"));
+        }
+    </script>
+</head>
+<body>
+    <h1>Workout Plan</h1>
+    <a href="001_Push.html">Day 1 - Push (Chest, Shoulders, Triceps)</a><br>
+    <a href="002_Pull.html">Day 2 - Pull (Biceps, Back, Rear Delts)</a><br>
+    <a href="003_Legs.html">Day 3 - Others (Legs, Abs)</a>
+</body>
 </html>
