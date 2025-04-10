@@ -322,6 +322,8 @@
         let audioContext;
         let soundEnabled = false;
         const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+        let iosAudioUnlocked = false;
+        let iosAudioElement = null;
 
         // Initialize when DOM is loaded
         document.addEventListener('DOMContentLoaded', function() {
@@ -339,13 +341,14 @@
             // Initialize audio context on first user interaction
             document.body.addEventListener('click', initAudio, { once: true });
             
-            // Add touch event listener for iOS
+            // Special iOS initialization
             if (isIOS) {
-                document.body.addEventListener('touchstart', initAudioOnIOS, { once: true });
-            }
-
-            // Hide sound button on non-iOS devices
-            if (!isIOS) {
+                document.getElementById('enableSoundBtn').style.display = 'block';
+                // Create a hidden audio element for iOS
+                iosAudioElement = new Audio();
+                iosAudioElement.volume = 0.5;
+                iosAudioElement.src = 'data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU...';
+            } else {
                 document.getElementById('enableSoundBtn').style.display = 'none';
                 soundEnabled = true;
             }
@@ -358,16 +361,6 @@
             } catch (e) {
                 console.error("AudioContext failed:", e);
             }
-        }
-        
-        function initAudioOnIOS() {
-            // This will help iOS prepare the audio context
-            initAudio();
-            // Play a silent sound to unlock audio
-            const audio = new Audio();
-            audio.volume = 0;
-            audio.src = 'data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU...';
-            audio.play().catch(e => console.log("iOS audio unlock attempt failed:", e));
         }
 
         function playTimerSound() {
@@ -395,8 +388,10 @@
                         console.warn("AudioContext resume failed:", e);
                         fallbackBeep();
                     });
-                } else {
+                } else if (audioContext) {
                     playBeep();
+                } else {
+                    fallbackBeep();
                 }
             } catch (e) {
                 console.warn("Sound playback failed:", e);
@@ -405,10 +400,15 @@
         }
 
         function playIOSBeep() {
+            if (!iosAudioUnlocked) {
+                fallbackBeep();
+                return;
+            }
+
             try {
                 // Create a new audio element each time for iOS
                 const audio = new Audio();
-                audio.src = 'data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU...'; // short beep
+                audio.src = 'data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU...';
                 audio.volume = 0.5;
                 audio.play().catch(e => {
                     console.log("iOS audio play failed:", e);
@@ -461,23 +461,26 @@
             btn.style.backgroundColor = "#28a745";
             
             // iOS requires playing a sound to unlock audio
-            try {
-                const audio = new Audio();
-                audio.volume = 0.1; // Very quiet but not silent
-                audio.src = 'data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU...'; // very short silent audio
-                audio.play().then(() => {
-                    setTimeout(() => {
-                        btn.style.display = 'none';
-                        // Play a test sound to confirm audio is working
-                        setTimeout(() => playTimerSound(), 200);
-                    }, 1500);
-                }).catch(e => {
-                    console.log("Audio unlock failed:", e);
+            if (isIOS) {
+                try {
+                    iosAudioElement.play().then(() => {
+                        iosAudioUnlocked = true;
+                        setTimeout(() => {
+                            btn.style.display = 'none';
+                            // Play a test sound to confirm audio is working
+                            setTimeout(() => playTimerSound(), 200);
+                        }, 1500);
+                    }).catch(e => {
+                        console.log("iOS audio unlock failed:", e);
+                        fallbackBeep();
+                    });
+                } catch (e) {
+                    console.log("iOS audio unlock failed:", e);
                     fallbackBeep();
-                });
-            } catch (e) {
-                console.log("Audio unlock failed:", e);
-                fallbackBeep();
+                }
+            } else {
+                btn.style.display = 'none';
+                playTimerSound();
             }
         }
 
