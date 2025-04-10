@@ -206,6 +206,17 @@
             z-index: 1000;
             border: 2px solid rgba(255,255,255,0.3);
         }
+        .sound-feedback {
+            position: fixed;
+            bottom: 60px;
+            left: 20px;
+            background: rgba(255,255,255,0.7);
+            padding: 10px;
+            border-radius: 5px;
+            z-index: 1000;
+            color: #000;
+            font-weight: bold;
+        }
         @keyframes pulse {
             0% { background-color: #d35400; }
             50% { background-color: #e74c3c; }
@@ -242,6 +253,11 @@
                 right: 10px;
                 padding: 8px 12px;
                 font-size: 12px;
+            }
+            .sound-feedback {
+                bottom: 50px;
+                left: 10px;
+                font-size: 14px;
             }
         }
     </style>
@@ -322,6 +338,11 @@
 
             // Initialize audio context on first user interaction
             document.body.addEventListener('click', initAudio, { once: true });
+            
+            // Add touch event listener for iOS
+            if (isIOS) {
+                document.body.addEventListener('touchstart', initAudioOnIOS, { once: true });
+            }
 
             // Hide sound button on non-iOS devices
             if (!isIOS) {
@@ -338,62 +359,99 @@
                 console.error("AudioContext failed:", e);
             }
         }
-
         
-function playTimerSound() {
-    if (!soundEnabled || !audioContext) return;
-
-    try {
-        if (audioContext.state === 'suspended') {
-            audioContext.resume().then(() => {
-                playBeep();
-            }).catch(e => {
-                console.warn("AudioContext resume failed:", e);
-                fallbackBeep();
-            });
-        } else {
-            playBeep();
+        function initAudioOnIOS() {
+            // This will help iOS prepare the audio context
+            initAudio();
+            // Play a silent sound to unlock audio
+            const audio = new Audio();
+            audio.volume = 0;
+            audio.src = 'data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU...';
+            audio.play().catch(e => console.log("iOS audio unlock attempt failed:", e));
         }
-    } catch (e) {
-        console.warn("Sound playback failed:", e);
-        fallbackBeep();
-    }
-}
 
-function playBeep() {
-    const oscillator = audioContext.createOscillator();
-    const gainNode = audioContext.createGain();
+        function playTimerSound() {
+            if (!soundEnabled) return;
 
-    oscillator.type = "sine";
-    oscillator.frequency.setValueAtTime(880, audioContext.currentTime);
-    gainNode.gain.setValueAtTime(0.05, audioContext.currentTime);
-
-    oscillator.connect(gainNode);
-    gainNode.connect(audioContext.destination);
-
-    oscillator.start();
-    oscillator.stop(audioContext.currentTime + 0.2);
-}
-
-function fallbackBeep() {
-    if (navigator.vibrate) {
-        navigator.vibrate([200]);
-    }
-}
-
-
-function playFallbackSound() {
-            try {
-                const audio = new Audio();
-                audio.src = 'data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU...';
-                audio.volume = 0.5;
-                audio.play().catch(e => console.log("Fallback sound play failed:", e));
-            } catch (e) {
-                console.log("Fallback audio creation failed:", e);
-                if (navigator.vibrate) {
-                    navigator.vibrate([200]);
-                }
+            // Show visual feedback
+            showSoundFeedback();
+            
+            // iOS requires special handling
+            if (isIOS) {
+                playIOSBeep();
+                return;
             }
+
+            // Standard handling for other devices
+            if (!audioContext) {
+                initAudio();
+            }
+
+            try {
+                if (audioContext && audioContext.state === 'suspended') {
+                    audioContext.resume().then(() => {
+                        playBeep();
+                    }).catch(e => {
+                        console.warn("AudioContext resume failed:", e);
+                        fallbackBeep();
+                    });
+                } else {
+                    playBeep();
+                }
+            } catch (e) {
+                console.warn("Sound playback failed:", e);
+                fallbackBeep();
+            }
+        }
+
+        function playIOSBeep() {
+            try {
+                // Create a new audio element each time for iOS
+                const audio = new Audio();
+                audio.src = 'data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU...'; // short beep
+                audio.volume = 0.5;
+                audio.play().catch(e => {
+                    console.log("iOS audio play failed:", e);
+                    fallbackBeep();
+                });
+            } catch (e) {
+                console.log("iOS audio creation failed:", e);
+                fallbackBeep();
+            }
+        }
+
+        function playBeep() {
+            if (!audioContext) return;
+            
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            oscillator.type = "sine";
+            oscillator.frequency.setValueAtTime(880, audioContext.currentTime);
+            gainNode.gain.setValueAtTime(0.05, audioContext.currentTime);
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            oscillator.start();
+            oscillator.stop(audioContext.currentTime + 0.2);
+        }
+
+        function fallbackBeep() {
+            if (navigator.vibrate) {
+                navigator.vibrate([200]);
+            }
+        }
+
+        function showSoundFeedback() {
+            const feedback = document.createElement('div');
+            feedback.className = 'sound-feedback';
+            feedback.textContent = '🔔 Beep!';
+            document.body.appendChild(feedback);
+            
+            setTimeout(() => {
+                document.body.removeChild(feedback);
+            }, 1000);
         }
 
         function enableSound() {
@@ -405,14 +463,21 @@ function playFallbackSound() {
             // iOS requires playing a sound to unlock audio
             try {
                 const audio = new Audio();
-                audio.volume = 0;
+                audio.volume = 0.1; // Very quiet but not silent
+                audio.src = 'data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU...'; // very short silent audio
                 audio.play().then(() => {
                     setTimeout(() => {
                         btn.style.display = 'none';
+                        // Play a test sound to confirm audio is working
+                        setTimeout(() => playTimerSound(), 200);
                     }, 1500);
+                }).catch(e => {
+                    console.log("Audio unlock failed:", e);
+                    fallbackBeep();
                 });
             } catch (e) {
                 console.log("Audio unlock failed:", e);
+                fallbackBeep();
             }
         }
 
