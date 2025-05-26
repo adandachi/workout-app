@@ -15,8 +15,8 @@ self.addEventListener('install', (event) => {
         // repoName + '/styles.css', // Uncomment and adjust if you have a separate CSS file
         // repoName + '/script.js', // Uncomment and adjust if you have a separate JS file
         // Add paths to any other assets like icons, other HTML pages, etc.
-        repoName + '/icons/icon-192x192.png', // Example icon paths
-        repoName + '/icons/icon-512x512.png', // Example icon paths
+        repoName + '/icon-192x192.png', // Example icon paths
+        repoName + '/icon-512x512.png', // Example icon paths
         // You might need to add other workout-related pages or images here
         // repoName + '/WIRKOUTS-WIP.html', // If this is another relevant HTML page
       ]);
